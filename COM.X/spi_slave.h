@@ -50,16 +50,29 @@ void spi_slave_start(spi_isr_set_t spi_isr);
 
 /*=====================================================
  * @brief
- *     SPIデータ送受信関数(1Byte)
+ *     SPIデータ受信関数(1Byte)
  * @param
- *     sent_data:送信データ
+ *     destination:通信の相手先
  * @return
- *     received_data:受信データwait for finish
+ *     SSPBUF:受信データ
  * @note
  *     none
  *===================================================*/
-uint8_t spi_send_receive(uint8_t sent_data);
+uint8_t spi_slave_receive(destination_t destination);
 
+
+/*=====================================================
+ * @brief
+ *     SPI Slaveデータ送信関数(1Byte)
+ * @param
+ *     destination:通信の相手先
+ *     data       :送信データ(1Byte)
+ * @return
+ *     void:
+ * @note
+ *     none
+ *===================================================*/
+void spi_slave_send(destination_t destination, uint8_t data);
 
 
 /*=====================================================
@@ -73,19 +86,6 @@ uint8_t spi_send_receive(uint8_t sent_data);
  *     none
  *===================================================*/
 void spi_slave_end(void);
-
-
-/*=====================================================
- * @brief
- *     SPI Interrupt function
- * @param
- *     none:
- * @return
- *     none:
- * @note
- *     none
- *===================================================*/
-void spi_interrupt(void);
 
 
 

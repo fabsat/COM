@@ -21,10 +21,6 @@
 #include "system_protocol.h"
 
 
-/* static関数のプロトタイプ宣言 */
-static void spi_reset(void);
-
-
 /*=====================================================
  * @brief
  *     SPI Slave初期化関数
@@ -84,35 +80,118 @@ void spi_slave_start(spi_isr_set_t spi_isr)
 
 /*=====================================================
  * @brief
- *     SPIデータ送受信関数(1Byte)
+ *     SPIデータ受信関数(1Byte)
  * @param
- *     sent_data:送信データ
+ *     destination:通信の相手先
  * @return
- *     received_data:受信データwait for finish
+ *     SSPBUF:受信データ
  * @note
  *     none
  *===================================================*/
-uint8_t spi_send_receive(uint8_t sent_data)
+uint8_t spi_slave_receive(destination_t destination)
 {
-    uint8_t received_data;
+    uint16_t timeout_counter = 60000;
 
-    /* transmit data into SSPBUF */
-    SSPBUF = sent_data;
+    /* SSPBUFにダミーデータを書き込む */
+    SSPBUF = 0x00;
 
-    /* Waiting for SPI finish */
-    while(SSPSTATbits.BF == 0)
+    /* 通信準備完了を通信相手に通知する */
+    switch(destination)
     {
-        ;        
+	case OBC1:
+            NOTIFICATION_TO_OBC1 = 1;
+            break;
+        case OBC2:
+            NOTIFICATION_TO_OBC2 = 1;
+            break;
     }
 
-    /* Get received data from register */
-    received_data = SSPBUF;
-    SSPBUF = 0xFF;
+    /* 受信完了待ち */
+    while(SSPSTATbits.BF == 0)
+    {
+        /* TIMEOUT (60[ms]を超えた時) */
+        if(timeout_counter == 0)
+        {
+            return = 0xff;
+        }
 
-    return received_data;
+        /* 1[us]ごとにtimeout_counterをデクリメントする。 */
+        __delay_us(1);
+        timeout_counter--;
+    }
+
+    /* 通信準備完了通知をLowにする */
+    switch(destination)
+    {
+	case OBC1:
+            NOTIFICATION_TO_OBC1 = 0;
+            break;
+        case OBC2:
+            NOTIFICATION_TO_OBC2 = 0;
+            break;
+    }
+
+    return SSPBUF;    
 }
 
 
+/*=====================================================
+ * @brief
+ *     SPI Slaveデータ送信関数(1Byte)
+ * @param
+ *     destination:通信の相手先
+ *     data       :送信データ(1Byte)
+ * @return
+ *     void:
+ * @note
+ *     none
+ *===================================================*/
+void spi_slave_send(destination_t destination, uint8_t data)
+{
+    uint16_t timeout_counter = 60000;
+
+    /* 念のためSSPBUFからダミー変数にデータを抜いておく */
+    dummy = SSPBUF;
+
+    /* 送信データを書き込む */
+    SSPBUF = data;
+
+    /* 通信準備完了を通信相手に通知する */
+    switch(destination)
+    {
+	case OBC1:
+            NOTIFICATION_TO_OBC1 = 1;
+            break;
+        case OBC2:
+            NOTIFICATION_TO_OBC2 = 1;
+            break;
+    }
+
+    /* 受信完了待ち */
+    while(SSPSTATbits.BF == 0)
+    {
+        /* TIMEOUT (60[ms]を超えた時) */
+        if(timeout_counter == 0)
+        {
+            return = 0xff;
+        }
+
+        /* 1[us]ごとにtimeout_counterをデクリメントする。 */
+        __delay_us(1);
+        timeout_counter--;
+    }
+
+    /* 通信準備完了通知をLowにする */
+    switch(destination)
+    {
+	case OBC1:
+            NOTIFICATION_TO_OBC1 = 0;
+            break;
+        case OBC2:
+            NOTIFICATION_TO_OBC2 = 0;
+            break;
+    }
+}
 
 
 /*=====================================================
@@ -139,42 +218,30 @@ void spi_slave_end(void)
 
 /*=====================================================
  * @brief
- *     SPI Interrupt function
+ *     SPIデータ送受信関数(1Byte)
  * @param
- *     none:
+ *     sent_data:送信データ
  * @return
- *     none:
+ *     received_data:受信データwait for finish
  * @note
  *     none
  *===================================================*/
-void spi_interrupt(void)
+/*
+uint8_t spi_send_receive(uint8_t sent_data)
 {
-    uint8_t data;
+    uint8_t received_data;
 
-    data = SSPBUF;
-    put_char(data);
-    put_string("\r\n");
+    SSPBUF = sent_data;
+
+
+    while(SSPSTATbits.BF == 0)
+    {
+        ;        
+    }
+
+    received_data = SSPBUF;
+    SSPBUF = 0xFF;
+
+    return received_data;
 }
-
-
-/*-----------------------------------------------------
- * @brief
- *     SPIリセット関数
- * @param
- *     なし
- * @return
- *     なし
- * @note
- *     待ち状態のreset_counterによって呼び出される
- *---------------------------------------------------*/
-static void spi_reset(void)
-{
-    unsigned char dummy;
-    
-    SSPEN = 0;         //  Reset SPI module
-    SSPEN = 1;         //  Reset SPI module
-    dummy = SSPBUF;
-    SSPIF = 0;
-    SSPEN = 0;         //  Reset SPI module
-    SSPEN = 1;         //  Reset SPI module
-}
+*/
