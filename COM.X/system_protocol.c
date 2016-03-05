@@ -18,11 +18,7 @@
 #include <xc.h>
 #include "pic_clock.h"
 #include "system_protocol.h"
-#include "spi_master.h"
-
-#include "AD_value.h"
-#include "plati_temp.h"
-
+#include "spi_slave.h"
 
 
 

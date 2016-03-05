@@ -77,15 +77,15 @@ typedef struct
 /* cw_struct_t型変数の初期化用 */
 #define CW_DATA_INIT  \
 {                     \
-	{0x00, 0x00}, \
-	{0x00, 0x00}, \
-	{0x00, 0x00}, \
-	{0x00, 0x00}, \
-	{0x00, 0x00}, \
-	{0x00, 0x00}, \
-	0,            \
-        0,            \    
-	0             \
+	{0x00, 0x00},     \
+	{0x00, 0x00},     \
+	{0x00, 0x00},     \
+	{0x00, 0x00},     \
+	{0x00, 0x00},     \
+	{0x00, 0x00},     \
+	0,                \
+    0,                \    
+	0                 \
 }
 
 
@@ -159,7 +159,7 @@ void cw_data_set(cw_t *p_cw_data);
  * @note
  *     この関数実行後にsetしたデータ内容は初期化される
  *===================================================*/
-void send_data_master(destination_t destination, uint8_t from_MCU, data_type_t data_type, data_end_command_t data_end_command);
+void send_data_master(destination_t destination, data_type_t data_type, data_end_command_t data_end_command);
 
 
 

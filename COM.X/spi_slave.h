@@ -8,6 +8,8 @@
  *=========================================================================================
  * ・ver1.00 || 2015/12/28 || Hirofumi Hamada
  *   初版作成
+ * ・ver2.00 || 2016/03/06 || Hirofumi Hamada
+ *   send と receiveに関数を分けた NOTIFICATIONピンの追加
  *=========================================================================================
  * PIC16F877A
  * MPLAB X IDE(V3.10/Ubuntu)
@@ -21,6 +23,7 @@
 
 #include <xc.h>
 #include "pic_clock.h"
+#include "system_protocol.h"
 
 /* SPI interrupt enable type */
 typedef enum

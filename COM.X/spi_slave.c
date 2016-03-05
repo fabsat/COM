@@ -6,8 +6,10 @@
  * PIC16F877A用SPI通信(Slave)ライブラリソースファイル
  *
  *=========================================================================================
- * ・ver1.00 || 初版 || 2015/12/28 || Hirofumi Hamada
+ * ・ver1.00 || 2015/12/28 || Hirofumi Hamada
  *   初版作成
+ * ・ver2.00 || 2016/03/06 || Hirofumi Hamada
+ *   send と receiveに関数を分けた NOTIFICATIONピンの追加
  *=========================================================================================
  * PIC16F877A
  * MPLAB X IDE(V3.10/Ubuntu)
@@ -69,7 +71,7 @@ void spi_slave_start(spi_isr_set_t spi_isr)
         INTCONbits.GIE  = 1;        
     }
 
-    /* NITIFICATIONピンをLow */
+    /* NOTIFICATIONピンをLow */
     NOTIFICATION_TO_OBC1 = 0;
     NOTIFICATION_TO_OBC2 = 0;
 
@@ -112,7 +114,7 @@ uint8_t spi_slave_receive(destination_t destination)
         /* TIMEOUT (60[ms]を超えた時) */
         if(timeout_counter == 0)
         {
-            return = 0xff;
+            return 0xff;
         }
 
         /* 1[us]ごとにtimeout_counterをデクリメントする。 */
@@ -149,6 +151,7 @@ uint8_t spi_slave_receive(destination_t destination)
 void spi_slave_send(destination_t destination, uint8_t data)
 {
     uint16_t timeout_counter = 60000;
+    uint8_t dummy;
 
     /* 念のためSSPBUFからダミー変数にデータを抜いておく */
     dummy = SSPBUF;
@@ -173,7 +176,7 @@ void spi_slave_send(destination_t destination, uint8_t data)
         /* TIMEOUT (60[ms]を超えた時) */
         if(timeout_counter == 0)
         {
-            return = 0xff;
+            return;
         }
 
         /* 1[us]ごとにtimeout_counterをデクリメントする。 */
