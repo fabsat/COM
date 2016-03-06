@@ -45,8 +45,8 @@ typedef enum
 /* 使用しているマイコンがOBC1=0x01, OBC2=0x02, COM=0x03, POW=0x04 */
 #define USE_MCU 0x03    
 
-/* C&DHからの送信データの有無 */
-extern destination_t cdh_call_status;
+/* C&DHからの送信データの有無 1であればreceive_packetにデータ有り */
+extern uint8_t cdh_call_status;
 
 
 /********************************************************************************
@@ -57,13 +57,13 @@ typedef enum
 {
     CW_TYPE = 0x01,
     DATA_TYPE,
-    COMMAND_TYPE,
 } data_type_t;
 
 
 /* コマンド一覧 */
 #define LED_BLINK     (0x01)
 #define GET_I2C_TEMP  (0x02)
+#define GET_CW_DATA   (0x03)
 
 
 /* データ終了コマンド一覧 */
@@ -73,12 +73,7 @@ typedef enum
     DATA_CONTINUE,    
 } data_end_command_t;
 
-
-/* コマンド受信時格納用 */
-extern uint8_t received_command;
-
-/* 受信したコマンドがあるか あればステータスが1となる */
-extern uint8_t command_status;
+extern uint8_t command_to_obc;
 
 
 /********************************************************************************

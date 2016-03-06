@@ -44,27 +44,8 @@ int main(void)
     while(1)
     {
         /* CWデータの送信処理 */
-        // cw_send();
+        // cw_send(&cw_data);
         
-        /* C&DHからのデータ送信要求がある場合の処理 */
-        if(cdh_call_status)
-        {
-            /* C&DH系からデータを受信する */
-            receive_from_cdh(cdh_call_status);
-
-            /* C&DHからのデータ送信要求をクリアする */
-            cdh_call_status = 0;
-        }
-
-        /* GSからの受信コマンドがある場合の処理 */
-        if(command_status)
-        {
-            /* CDHにコマンドを送信 */
-            send_command();
-
-            /* command_statusをクリアして新たなコマンドを受け取れるようにする */
-            command_status = 0;
-        }
     }
 
     return 0;

@@ -74,7 +74,7 @@ void spi_slave_start(spi_isr_set_t spi_isr)
     /* NOTIFICATIONピンをLow */
     NOTIFICATION_TO_OBC1 = 0;
     NOTIFICATION_TO_OBC2 = 0;
-
+    
     /* End SPI programming and Start serial port */
     SSPCONbits.SSPEN = 1;    // Enables serial port and configures SCK, SDO, SDI, and SS as serial port pins
 }
@@ -107,7 +107,7 @@ uint8_t spi_slave_receive(destination_t destination)
             NOTIFICATION_TO_OBC2 = 1;
             break;
     }
-
+    
     /* 受信完了待ち */
     while(SSPSTATbits.BF == 0)
     {
@@ -132,7 +132,7 @@ uint8_t spi_slave_receive(destination_t destination)
             NOTIFICATION_TO_OBC2 = 0;
             break;
     }
-
+    
     return SSPBUF;    
 }
 
