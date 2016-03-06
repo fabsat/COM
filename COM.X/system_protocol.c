@@ -1,9 +1,10 @@
 /******************************************************************************************
  * system_protocol.c
  * ver1.00
- * Hirofumi Hamada & Tetsuya Kaku
+ * Hirofumi Hamada
  *=========================================================================================
- * MCU間のデータ送受信プロトコルのソースファイル
+ * 通信系用System&Protocolレイヤーライブラリのソースファイル
+ * MCU間のデータ送受信プロトコル
  *
  *=========================================================================================
  * ・ver1.00 || 2016/02/13 || Hirofumi Hamada
@@ -87,6 +88,7 @@ static uint8_t index_pos;
  *===================================================*/
 void sys_init(void)
 {
+    /* OBCへの通知ピンを初期化 */
     NOTIF_TO_OBC1_TRIS = 0;
     NOTIF_TO_OBC2_TRIS = 0;
 }
@@ -147,7 +149,7 @@ uint8_t sent_data_set(void *p_data, uint8_t data_len, uint8_t byte_of_data)
 
 /*=====================================================
  * @brief
- *     指定したサブシステムにデータを送信する(Master用)
+ *     指定したサブシステムにデータを送信する(Slave用)
  * @param
  *     destination     :送信の相手先
  *     data_type       :payloadに格納したデータのタイプ
@@ -166,14 +168,9 @@ void send_data_slave(destination_t destination, data_type_t data_type, data_end_
 }
 
 
-void cdh_call(destination_t destination)
-{
-    
-}
-
 /*=====================================================
  * @brief
- *     指定したサブシステムにデータを受信する(Master用)
+ *     指定したサブシステムからデータを受信する(Slave用)
  * @param
  *     destination     :送信元
  *     data_type       :payloadに格納したデータのタイプ
@@ -381,21 +378,19 @@ static void receive_payload(destination_t destination, uint8_t *p_payload)
 {
     uint8_t i;
     uint8_t data_len;
-//    uint8_t index_pos = 0;                             // Counter variable for MAX_PAYLOAD_SIZE
-    uint8_t rec_index_pos = 0;                          // ここでカウントアップするindexはこれにして、この.cファイルにはグローバルでindex_posがあるので他の名前がいいと思います
+    uint8_t rec_index_pos = 0;                          
     
     /* Send Payload */
-    //while(*p_payload != 0x00 || index_pos < MAX_PAYLOAD_SIZE)           // *p_payloadが0x00の時は普通のデータ中にも出てくる可能性があると思うので次の式がいいと思います
-    while(index_pos != rec_index_pos || rec_index_pos < MAX_PAYLOAD_SIZE)    
+    while(*p_payload != 0x00 || index_pos < MAX_PAYLOAD_SIZE)          
     {
-        data_len = *p_payload;                         // Get data length of Received data
-        spi_master_receive(destination, p_payload++);     // Receive data length
-        //index_pos++;                                
+        data_len = *p_payload;                        // Get data length of Received data
+        spi_master_receive(destination, p_payload++); // Receive data length
+        index_pos++;                                
         rec_index_pos++;
-        for(i = 0; i < data_len; i++)                  // Receive data in data length times
+        for(i = 0; i < data_len; i++)                 // Receive data in data length times
         {
             spi_master_receive(destination, p_payload++);
-            //index_pos++;
+            index_pos++;
             rec_index_pos++;
         }
     }

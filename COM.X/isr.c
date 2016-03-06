@@ -10,13 +10,24 @@
  * 割込みルーチン関数
  *===================================================*/
 void interrupt isr(void)
-{   
+{
+    uint8_t data;
+    
     /* SPI割込み */
     if(PIR1bits.SSPIF == 1)
     {
-        cdh_call_status = SSPBUF; // SPI受信データを受け取る(OBC1 or OBC2を判断するデータを受け取る)
-        SSPBUF          = 0x00;   // これがないと次に割込みが入った時にSSPBUFに渡すものがないため割込みが入らない
-        PIR1bits.SSPIF  = 0;      // SPI割込みフラグクリア
+        data = SSPBUF; // SPI受信データを受け取る(OBC1 or OBC2を判断するデータを受け取る)
+        switch(data)
+        {
+            case 0x01:
+                cdh_call_status = OBC1;
+                break;
+            case 0x02:
+                cdh_call_status = OBC2;
+                break;
+        }
+        SSPBUF         = 0x00;   // これがないと次に割込みが入った時にSSPBUFに渡すものがないため割込みが入らない
+        PIR1bits.SSPIF = 0;      // SPI割込みフラグクリア
     }
 
     /* I/O割込み (地上局からのコマンド) */

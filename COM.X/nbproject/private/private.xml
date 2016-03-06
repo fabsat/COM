@@ -5,11 +5,13 @@
         <group>
             <file>file:/Users/hirofumi/Dropbox/home/TSP/fabSat/2015年度/通信試験モデル開発/source/COM/COM.X/system_protocol.c</file>
             <file>file:/Users/hirofumi/Dropbox/home/TSP/fabSat/2015年度/通信試験モデル開発/source/COM/COM.X/isr.c</file>
+            <file>file:/Users/hirofumi/Dropbox/home/TSP/fabSat/2015年度/通信試験モデル開発/source/COM/COM.X/com_app.c</file>
             <file>file:/Users/hirofumi/Dropbox/home/TSP/fabSat/2015年度/通信試験モデル開発/source/COM/COM.X/isr.h</file>
             <file>file:/Users/hirofumi/Dropbox/home/TSP/fabSat/2015年度/通信試験モデル開発/source/COM/COM.X/spi_slave.c</file>
             <file>file:/Users/hirofumi/Dropbox/home/TSP/fabSat/2015年度/通信試験モデル開発/source/COM/COM.X/spi_slave.h</file>
             <file>file:/Users/hirofumi/Dropbox/home/TSP/fabSat/2015年度/通信試験モデル開発/source/COM/COM.X/system_protocol.h</file>
             <file>file:/Users/hirofumi/Dropbox/home/TSP/fabSat/2015年度/通信試験モデル開発/source/COM/COM.X/main.c</file>
+            <file>file:/Users/hirofumi/Dropbox/home/TSP/fabSat/2015年度/通信試験モデル開発/source/COM/COM.X/com_app.h</file>
         </group>
     </open-files>
 </project-private>
