@@ -1,6 +1,6 @@
 
-#ifndef _DATA_SEND_RECEIVE_PROTOCOL_H
-#define	_DATA_SEND_RECEIVE_PROTOCOL_H
+#ifndef SYSTEM_PROTOCOL_H
+#define	SYSTEM_PROTOCOL_H
 
 #include <xc.h>
 #include "pic_clock.h"
@@ -20,11 +20,16 @@
 /* データ転送の相手先 */
 typedef enum
 {
-    OBC1,    
-    OBC2,
+    OBC1 = 0x01,    
+    OBC2 = 0x02,
 } destination_t;
 
-#define USE_MCU 0x00        // 使用しているマイコンがOBC1=0x00, OBC2=0x01, COM=0x02, POW=0x03
+/* 使用しているマイコンがOBC1=0x01, OBC2=0x02, COM=0x03, POW=0x04 */
+#define USE_MCU 0x03    
+
+/* C&DHからの送信データの有無 */
+extern uint8_t cdh_call_status;
+
 
 /********************************************************************************
  *                          パケット関連の各種定義                                *
@@ -36,10 +41,6 @@ typedef enum
     DATA_TYPE,
     COMMAND_TYPE,
 } data_type_t;
-
-#define COMMAND 0x03
-#define DATA    0x02
-#define CW      0x01
 
 
 /* コマンド一覧 */
@@ -54,6 +55,12 @@ typedef enum
     DATA_CONTINUE,    
 } data_end_command_t;
 
+
+/* コマンド受信時格納用 */
+extern uint8_t received_command;
+
+/* 受信したコマンドがあるか あればステータスが1となる */
+extern uint8_t command_status;
 
 
 /********************************************************************************
@@ -77,15 +84,15 @@ typedef struct
 /* cw_struct_t型変数の初期化用 */
 #define CW_DATA_INIT  \
 {                     \
-	{0x00, 0x00},     \
-	{0x00, 0x00},     \
-	{0x00, 0x00},     \
-	{0x00, 0x00},     \
-	{0x00, 0x00},     \
-	{0x00, 0x00},     \
-	0,                \
-    0,                \    
-	0                 \
+	{0x00, 0x00}, \
+	{0x00, 0x00}, \
+	{0x00, 0x00}, \
+	{0x00, 0x00}, \
+	{0x00, 0x00}, \
+	{0x00, 0x00}, \
+	0,            \
+        0,            \
+	0             \
 }
 
 
@@ -103,9 +110,8 @@ typedef struct
  *  @note
  *     各MCUからの状態通知ピンの設定
  *===================================================*/
-void sysprot_init(void);
+void sys_port_init(void);
 
-void cw_set(void);
 
 /*=====================================================
  * @brief
@@ -132,19 +138,6 @@ void cw_set(void);
  *     最大ペイロードサイズまで格納できる
  *===================================================*/
 uint8_t sent_data_set(void *p_data, uint8_t data_len, uint8_t byte_of_data);
-
-
-/*=====================================================
- * @brief
- *     PayloadへCW用データを格納する
- * @param
- *     p_cw_data:CWデータへのポインタ
- * @return
- *     void:
- * @note
- *     none
- *===================================================*/
-void cw_data_set(cw_t *p_cw_data);
 
 
 /*=====================================================

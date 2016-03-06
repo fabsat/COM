@@ -66,7 +66,6 @@ static void packet_receive_master(destination_t destination, packet_format_t *p_
  *****************************************************************************************/
 /* このグローバル変数のパケットに各種データを格納していく データが送信されたら初期化される */
 static packet_format_t packet = PACKET_INIT;
-//static cw_t cw = CW_DATA_INIT; // これはmain側で値の入れ替えを行うかもしれないので変数定義はmain.cでと考える
 
 /* データの格納できる先頭インデックスを示す データが送信されたら初期化される */
 static uint8_t index_pos;
@@ -76,39 +75,21 @@ static uint8_t index_pos;
 /******************************************************************************************
  *                                     ライブラリ関数                                      *
  *****************************************************************************************/
-
-
-/*system_protocol初期設定関数*/
-void sysprot_init(void)
+/*=====================================================
+ * @brief
+ *     SYSTEM PROTOCOL初期化関数
+ * @param
+ *     void:
+ * @return
+ *     void:
+ * @note
+ *     none
+ *===================================================*/
+void sys_init(void)
 {
-    COM_READY_PIN_TRIS  = 1;
-    POW_READY_PIN_TRIS  = 1;
-    
-    //他にあれば随時追加します
+    NOTIF_TO_OBC1_TRIS = 0;
+    NOTIF_TO_OBC2_TRIS = 0;
 }
-
-
-/*エラーが出る*/
-void cw_set(void)
-{
-    packet_format_t.data_type = 1;
-    spi_master_start();
-    spi_master_receive(POW, cw_t.power1[0]);
-    spi_master_receive(POW, cw_t.power1[1]);
-    spi_master_receive(POW, cw_t.power2[0]);
-    spi_master_receive(POW, cw_t.power2[1]);
-    spi_master_receive(POW, cw_t.power3[0]);
-    spi_master_receive(POW, cw_t.power3[1]);
-    spi_master_receive(POW, cw_t.power4[0]);
-    spi_master_receive(POW, cw_t.power4[1]);
-    spi_master_receive(POW, cw_t.power5[0]);
-    spi_master_receive(POW, cw_t.power5[1]);
-    cw_t.temp = (uint16_t)get_temp();
-    cw_t.obc2 = 1;
-    cw_t.powmcu = 1;
-}
-
-
 
 
 /*=====================================================
@@ -129,7 +110,7 @@ void cw_set(void)
  *                  uintt16_tなら2
  *                  doubleなら4
  * @return
- *     Flee space of payload:ペイロードの残り空き容量
+ *     Free space of payload:ペイロードの残り空き容量
  *     0xff:渡されたデータ全ては格納できない
  *          またはbyte_of_dataが適切な値でない
  * @note
@@ -166,38 +147,6 @@ uint8_t sent_data_set(void *p_data, uint8_t data_len, uint8_t byte_of_data)
 
 /*=====================================================
  * @brief
- *     PayloadへCW用データを格納する
- * @param
- *     p_cw_data:CWデータへのポインタ
- * @return
- *     void:
- * @note
- *     none
- *===================================================*/
-void cw_data_set(cw_t *p_cw_data)
-{
-    uint8_t i;
-    
-    /* 電源データの格納 */
-    uint8_data_set(&(p_cw_data->power1), 2);
-    uint8_data_set(&(p_cw_data->power2), 2);
-    uint8_data_set(&(p_cw_data->power3), 2);
-    uint8_data_set(&(p_cw_data->power4), 2);
-    uint8_data_set(&(p_cw_data->power5), 2);
-
-    /* 温度データの格納 */
-    uint8_data_set(&(p_cw_data->temp), 2);
-
-    /* OBC2のステータス格納 */
-    uint8_data_set(&(p_cw_data->obc2), 1);
-
-    /* POWMCUのステータス格納 */
-    uint8_data_set(&(p_cw_data->powmcu), 1);
-}
-
-
-/*=====================================================
- * @brief
  *     指定したサブシステムにデータを送信する(Master用)
  * @param
  *     destination     :送信の相手先
@@ -208,14 +157,19 @@ void cw_data_set(cw_t *p_cw_data)
  * @note
  *     この関数実行後にsetしたデータ内容は初期化される
  *===================================================*/
-void send_data_master(destination_t destination, data_type_t data_type, data_end_command_t data_end_command)
+void send_data_slave(destination_t destination, data_type_t data_type, data_end_command_t data_end_command)
 {
     packet.data_type        = (uint8_t)data_type;
     packet.data_end_command = (uint8_t)data_end_command;
 
-    packet_send_master(destination, &packet);
+    packet_send_slave(destination);
 }
 
+
+void cdh_call(destination_t destination)
+{
+    
+}
 
 /*=====================================================
  * @brief
@@ -229,7 +183,7 @@ void send_data_master(destination_t destination, data_type_t data_type, data_end
  * @note
  *     この関数実行後にsetしたデータ内容は初期化される
  *===================================================*/
-void receive_data_master(destination_t destination, uint8_t from_MCU)
+void receive_data_slave(destination_t destination)
 {   
     packet_receive_master(destination, &packet);
 }
@@ -388,11 +342,11 @@ static void double_to_byte_array(double *p_data, uint8_t *p_data_array)
  *     送信するpayloadのバイトデータが0x00になるまで
  *     又はMAX_PAYLOAD_SIZEを送るまでSPIでデータ送信する。
  *---------------------------------------------------*/
-static uint8_t send_payload(destination_t destination, uint8_t *p_payload)
+static uint8_t send_payload(destination_t destination)
 {
     uint8_t i;
     uint8_t data_len;
-    uint8_t index_pos = 0;                             // Counter variable for MAX_PAYLOAD_SIZE
+    uint8_t *p_payload = packet.payload;
 
     /* Send Payload */
     while(*p_payload != 0x00 || index_pos < MAX_PAYLOAD_SIZE)
@@ -459,7 +413,7 @@ static void receive_payload(destination_t destination, uint8_t *p_payload)
  * @note
  *     none
  *---------------------------------------------------*/
-static void packet_send_master(destination_t destination, packet_format_t *p_packet)
+static void packet_send_slave(destination_t destination, packet_format_t *p_packet)
 {
     /* プリアンブルを送信 */
     spi_master_send(destination, USE_MCU);
@@ -486,7 +440,7 @@ static void packet_send_master(destination_t destination, packet_format_t *p_pac
  * @note
  *     none
  *---------------------------------------------------*/
-static void packet_receive_master(destination_t destination, packet_format_t *p_packet)
+static void packet_receive_slave(destination_t destination, packet_format_t *p_packet)
 {
     uint8_t use_obc = 0x00;
     
